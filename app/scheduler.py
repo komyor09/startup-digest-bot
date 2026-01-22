@@ -77,4 +77,7 @@ async def scheduler():
 
 
 if __name__ == "__main__":
-    asyncio.run(scheduler())
+    try:
+        asyncio.run(scheduler())
+    except KeyboardInterrupt:
+        logger.info("Scheduler stopped by user (Ctrl+C)")

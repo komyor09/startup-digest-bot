@@ -28,7 +28,6 @@ if __name__ == "__main__":
     start("python -m app.bot")
     start("python -m app.scheduler")
 
-    # Windows-compatible blocking loop
     try:
         while True:
             time.sleep(1)
