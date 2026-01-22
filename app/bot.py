@@ -57,8 +57,14 @@ async def now_handler(message: Message):
 
 
 async def main():
-    await dp.start_polling(bot)
+    try:
+        await dp.start_polling(bot)
+    except asyncio.CancelledError:
+        logger.info("Bot polling cancelled")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("Bot stopped by user (Ctrl+C)")
