@@ -20,7 +20,7 @@ async def set_time_handler(message: Message):
             "`/settime ЧЧ:MM`\n\n"
             "Пример:\n"
             "`/settime 09:30`",
-            parse_mode="Markdown"
+            parse_mode="Markdown",
         )
         return
 
@@ -33,7 +33,7 @@ async def set_time_handler(message: Message):
             "❌ *Неверный формат времени*\n\n"
             "Используй формат `ЧЧ:MM`, например:\n"
             "`/settime 14:30`",
-            parse_mode="Markdown"
+            parse_mode="Markdown",
         )
         return
 
@@ -41,9 +41,8 @@ async def set_time_handler(message: Message):
     storage.set_user_time(message.from_user.id, time_str)
 
     await message.answer(
-        f"✅ *Время ежедневного дайджеста установлено*\n\n"
-        f"⏰ Новое время: `{time_str}`",
-        parse_mode="Markdown"
+        f"✅ *Время ежедневного дайджеста установлено*\n\n⏰ Новое время: `{time_str}`",
+        parse_mode="Markdown",
     )
 
 
@@ -54,16 +53,12 @@ async def get_time_handler(message: Message):
 
     if time:
         await message.answer(
-            f"⏰ *Ваше текущее время рассылки*\n\n"
-            f"`{time}`",
-            parse_mode="Markdown"
+            f"⏰ *Ваше текущее время рассылки*\n\n`{time}`", parse_mode="Markdown"
         )
     else:
         await message.answer(
-            "⏰ *Время рассылки ещё не задано*\n\n"
-            "Используй команду:\n"
-            "`/settime ЧЧ:MM`",
-            parse_mode="Markdown"
+            "⏰ *Время рассылки ещё не задано*\n\nИспользуй команду:\n`/settime ЧЧ:MM`",
+            parse_mode="Markdown",
         )
 
 
@@ -90,8 +85,9 @@ async def reset_sent_handler(message: Message):
         f"♻️ *Состояние доставки сброшено*\n\n"
         f"👤 Пользователь: `{target_user_id}`\n"
         "📬 Дайджест может быть отправлен снова сегодня.",
-        parse_mode="Markdown"
+        parse_mode="Markdown",
     )
+
 
 @router.message(Command("users"))
 async def users_handler(message: Message):
@@ -106,14 +102,36 @@ async def users_handler(message: Message):
         await message.answer("Пока нет пользователей")
         return
 
-    text = "👥 *Пользователи бота:*\n\n"
+    total = len(users)
+    text = (
+        f"👥 Пользователи бота\n"
+        f"Всего в списке: {total}\n\n"
+    )
 
-    for u in users:
-        username = f"@{u['username']}" if u['username'] else "—"
+    for i, u in enumerate(users, start=1):
+        username = f"@{u['username']}" if u["username"] else "—"
+
         text += (
-            f"🆔 `{u['user_id']}`\n"
-            f"👤 {username}\n"
-            f"📛 {u['full_name']}\n\n"
+            f"{i}. ID: {u['user_id']}\n"
+            f"Username: {username}\n"
+            f"Name: {u['full_name']}\n\n"
         )
 
-    await message.answer(text, parse_mode="Markdown")
+    await message.answer(text)
+
+@router.message(lambda m: m.text == "👥 Пользователи")
+async def users_button_handler(message: Message):
+    if message.from_user.id != ADMIN_USER_ID:
+        return
+
+    await users_handler(message)
+
+@router.message(lambda m: m.text == "♻️ Reset today")
+async def reset_today_button(message: Message):
+    if message.from_user.id != ADMIN_USER_ID:
+        return
+
+    storage = Storage()
+    storage.clear_last_sent_date(ADMIN_USER_ID)
+
+    await message.answer("♻️ Состояние доставки сброшено для сегодня")

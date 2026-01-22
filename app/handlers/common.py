@@ -2,8 +2,9 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from app.keyboards.main import main_keyboard
+from app.keyboards.main import user_keyboard, admin_keyboard
 from app.storage import Storage
+from app.config import ADMIN_USER_ID
 
 router = Router()
 
@@ -12,6 +13,10 @@ router = Router()
 async def start_handler(message: Message):
     storage = Storage()
     storage.save_user(message.from_user)
+
+    is_admin = message.from_user.id == ADMIN_USER_ID
+    keyboard = admin_keyboard() if is_admin else user_keyboard()
+
     text = (
         "👋 *Добро пожаловать!*\n\n"
         "Я автоматически собираю стартап- и венчурные новости "
@@ -25,10 +30,13 @@ async def start_handler(message: Message):
         "👉 `/settime 14:30`"
     )
 
+    if is_admin:
+        text += "\n\n🛡 *Режим администратора активен*"
+
     await message.answer(
         text,
         parse_mode="Markdown",
-        reply_markup=main_keyboard(),
+        reply_markup=keyboard,
     )
 
 
