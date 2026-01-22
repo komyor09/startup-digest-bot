@@ -20,3 +20,12 @@ In this MVP version, RSS parsing is implemented, but content availability
 depends on external feed stability.
 
 For production use, HTML parsing or official APIs can be added as a fallback.
+
+### Sifted source note
+
+Sifted blocks automated HTTP requests (403 Forbidden).
+In this MVP version, a lightweight HTML parser is implemented with
+graceful fallback in case of access restrictions.
+
+For production use, this source would require official API access
+or licensed content integration.
