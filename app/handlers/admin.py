@@ -82,17 +82,14 @@ async def help_callback(callback: CallbackQuery):
 
 @router.message(Command("resetsent"))
 async def reset_sent_handler(message: Message):
-    # доступ только админу
     if message.from_user.id != ADMIN_USER_ID:
         await message.answer("⛔ Команда доступна только администратору")
         return
 
     parts = message.text.strip().split()
 
-    # по умолчанию — сбрасываем админу
     target_user_id = ADMIN_USER_ID
 
-    # если передали user_id
     if len(parts) == 2:
         try:
             target_user_id = int(parts[1])
