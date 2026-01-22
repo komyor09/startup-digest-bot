@@ -1,5 +1,6 @@
 import requests
 from datetime import datetime
+from app.logger import logger
 
 TOP_STORIES_URL = "https://hacker-news.firebaseio.com/v0/topstories.json"
 ITEM_URL = "https://hacker-news.firebaseio.com/v0/item/{}.json"
@@ -27,5 +28,5 @@ def parse_hackernews(limit: int = 20):
             ).isoformat(),
             "source": "Hacker News"
         })
-
+    logger.info(f"[HackerNews] Parsed {len(items)} items")
     return items

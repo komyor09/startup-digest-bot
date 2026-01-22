@@ -1,5 +1,6 @@
 import feedparser
 from datetime import datetime
+from app.logger import logger
 
 FEED_URL = "https://rb.ru/rss/"
 
@@ -13,12 +14,15 @@ def parse_rusbase():
         if hasattr(entry, "published"):
             published = datetime(*entry.published_parsed[:6]).isoformat()
 
-        items.append({
-            "title": entry.title,
-            "url": entry.link,
-            "summary": entry.summary if hasattr(entry, "summary") else "",
-            "published_at": published,
-            "source": "RB.ru"
-        })
+        items.append(
+            {
+                "title": entry.title,
+                "url": entry.link,
+                "summary": entry.summary if hasattr(entry, "summary") else "",
+                "published_at": published,
+                "source": "RB.ru",
+            }
+        )
+    logger.info(f"[RusBase] Parsed {len(items)} items")
 
     return items

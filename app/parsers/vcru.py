@@ -1,5 +1,6 @@
 import feedparser
 from datetime import datetime
+from app.logger import logger
 
 FEED_URL = "https://vc.ru/rss/tribuna"
 
@@ -20,5 +21,6 @@ def parse_vcru():
             "published_at": published,
             "source": "VC.ru"
         })
+    logger.info(f"[VCRU] Parsed {len(items)} items")
 
     return items

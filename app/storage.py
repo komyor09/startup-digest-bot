@@ -1,6 +1,7 @@
 import sqlite3
 from datetime import datetime
 from pathlib import Path
+from app.logger import logger
 
 DB_PATH = Path(__file__).resolve().parent / "news.db"
 
@@ -34,6 +35,7 @@ class Storage:
 
     def save_news(self, item: dict):
         if self.news_exists(item["url"]):
+            logger.debug(f"[Storage] Duplicate skipped: {item['url']}")
             return False
 
         self.conn.execute("""
@@ -48,6 +50,7 @@ class Storage:
             datetime.utcnow().isoformat()
         ))
         self.conn.commit()
+        logger.info(f"[Storage] Saved news: {item['url']}")
         return True
 
     def get_today_news(self):

@@ -1,4 +1,5 @@
 from playwright.sync_api import sync_playwright
+from app.logger import logger
 
 URL = "https://sifted.eu/tag/startup-fundraise"
 
@@ -57,4 +58,6 @@ def parse_sifted_playwright():
 
     # убираем дубли
     unique = {item["url"]: item for item in items}
+
+    logger.info(f"[Sifted] Parsed {len(items)} items")
     return list(unique.values())

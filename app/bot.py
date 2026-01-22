@@ -3,6 +3,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from aiogram.types import Message
 from datetime import datetime
+from app.logger import logger
 
 from app.config import BOT_TOKEN
 from app.digest import get_top_news
@@ -33,6 +34,7 @@ async def start_handler(message: Message):
 
 @dp.message(Command("now"))
 async def now_handler(message: Message):
+    logger.info(f"[Bot] /now requested by {message.from_user.id}")
     news = get_top_news()
 
     if not news:

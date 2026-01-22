@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime, timedelta
+from app.logger import logger
 
 from app.bot import bot
 from app.digest import get_top_news
@@ -35,9 +36,10 @@ async def send_daily_digest():
         )
 
     try:
+        logger.info("[Scheduler] Daily digest sent")
         await bot.send_message(CHAT_ID, text, parse_mode="Markdown")
     except TelegramNetworkError as e:
-        print("Telegram network error:", e)
+        logger.error(f"[Scheduler] Telegram error: {e}")
 
 
 async def scheduler():
