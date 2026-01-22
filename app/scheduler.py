@@ -6,6 +6,8 @@ from app.bot import bot
 from app.digest import get_top_news
 from app.config import DIGEST_HOUR, DIGEST_MINUTE, CHAT_ID
 from aiogram.exceptions import TelegramNetworkError
+from app.storage import Storage
+from app.config import ADMIN_USER_ID
 
 
 def format_published_at(value: str | None) -> str:
@@ -43,17 +45,35 @@ async def send_daily_digest():
 
 
 async def scheduler():
+    storage = Storage()
+    logger.info("[Scheduler] Started")
+
     while True:
         now = datetime.now()
-        target = now.replace(
-            hour=DIGEST_HOUR, minute=DIGEST_MINUTE, second=0, microsecond=0
-        )
 
-        if target <= now:
-            target += timedelta(days=1)
+        user_time = storage.get_user_time(ADMIN_USER_ID)
+        if not user_time:
+            await asyncio.sleep(20)
+            continue
 
-        await asyncio.sleep((target - now).total_seconds())
-        await send_daily_digest()
+        try:
+            hour, minute = map(int, user_time.split(":"))
+        except ValueError:
+            await asyncio.sleep(20)
+            continue
+
+        target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+
+        last_sent = storage.get_last_sent_date(ADMIN_USER_ID)
+
+        # ГЛАВНОЕ УСЛОВИЕ
+        if now >= target and last_sent != now.date():
+            await send_daily_digest()
+            storage.set_last_sent_date(ADMIN_USER_ID, now.date())
+
+        await asyncio.sleep(20)
+
+        
 
 
 if __name__ == "__main__":
