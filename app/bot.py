@@ -11,6 +11,17 @@ bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 
+def format_published_at(value: str | None) -> str:
+    if not value:
+        return "unknown date"
+
+    try:
+        dt = datetime.fromisoformat(value)
+        return dt.strftime("%d %b %Y %H:%M")
+    except Exception:
+        return "unknown date"
+
+
 @dp.message(Command("start"))
 async def start_handler(message: Message):
     await message.answer(
@@ -34,7 +45,11 @@ async def now_handler(message: Message):
 
     for i, item in enumerate(news, 1):
         source = item.get("source", "Unknown")
-        text += f"{i}️⃣ *{item['title']}*\n📍 {source}\n🔗 {item['url']}\n\n"
+        published = format_published_at(item.get("published_at"))
+
+        text += (
+            f"{i}️⃣ *{item['title']}*\n📍 {source}\n🕒 {published}\n🔗 {item['url']}\n\n"
+        )
 
     await message.answer(text, parse_mode="Markdown")
 

@@ -7,6 +7,17 @@ from app.config import DIGEST_HOUR, DIGEST_MINUTE, CHAT_ID
 from aiogram.exceptions import TelegramNetworkError
 
 
+def format_published_at(value: str | None) -> str:
+    if not value:
+        return "unknown date"
+
+    try:
+        dt = datetime.fromisoformat(value)
+        return dt.strftime("%d %b %Y %H:%M")
+    except Exception:
+        return "unknown date"
+
+
 async def send_daily_digest():
     news = get_top_news()
     if not news:
@@ -17,10 +28,10 @@ async def send_daily_digest():
 
     for i, item in enumerate(news, 1):
         source = item.get("source", "Unknown")
+        published = format_published_at(item.get("published_at"))
+
         text += (
-            f"{i}️⃣ *{item['title']}*\n"
-            f"📍 {source}\n"
-            f"🔗 {item['url']}\n\n"
+            f"{i}️⃣ *{item['title']}*\n📍 {source}\n🕒 {published}\n🔗 {item['url']}\n\n"
         )
 
     try:
