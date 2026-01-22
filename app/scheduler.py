@@ -8,17 +8,7 @@ from app.config import DIGEST_HOUR, DIGEST_MINUTE, CHAT_ID
 from aiogram.exceptions import TelegramNetworkError
 from app.storage import Storage
 from app.config import ADMIN_USER_ID
-
-
-def format_published_at(value: str | None) -> str:
-    if not value:
-        return "unknown date"
-
-    try:
-        dt = datetime.fromisoformat(value)
-        return dt.strftime("%d %b %Y %H:%M")
-    except Exception:
-        return "unknown date"
+from app.utils import format_published_at
 
 
 async def send_daily_digest():

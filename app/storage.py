@@ -118,3 +118,11 @@ class Storage:
         )
         self.conn.commit()
         logger.info(f"[Storage] Digest marked as sent for {sent_date}")
+
+    def clear_last_sent_date(self, user_id: int):
+        self.conn.execute(
+            "DELETE FROM delivery_state WHERE user_id = ?",
+            (user_id,)
+        )
+        self.conn.commit()
+        logger.info(f"[Storage] Delivery state reset for user {user_id}")
