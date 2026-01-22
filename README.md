@@ -115,12 +115,9 @@ pip install -r requirements.txt
 ```
 Запустите бота Telegram:
 ```bash
-python -m app.bot
+python start.py
 ```
-Запустите планировщик для ежедневной доставки:
-```bash
-python -m app.scheduler
-```
+
 ---
 ## Примечания
 Локальный доступ к API Telegram Bot может быть ограничен из-за сетевых,
