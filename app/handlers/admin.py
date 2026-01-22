@@ -1,6 +1,6 @@
 from aiogram import Router
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message
 from datetime import datetime
 
 from app.storage import Storage
@@ -14,7 +14,14 @@ async def set_time_handler(message: Message):
     parts = message.text.strip().split()
 
     if len(parts) != 2:
-        await message.answer("❌ Использование: /settime ЧЧ:MM")
+        await message.answer(
+            "❌ *Неверный формат команды*\n\n"
+            "Используй:\n"
+            "`/settime ЧЧ:MM`\n\n"
+            "Пример:\n"
+            "`/settime 09:30`",
+            parse_mode="Markdown"
+        )
         return
 
     time_str = parts[1]
@@ -22,13 +29,22 @@ async def set_time_handler(message: Message):
     try:
         datetime.strptime(time_str, "%H:%M")
     except ValueError:
-        await message.answer("❌ Неверный формат времени. Use ЧЧ:MM")
+        await message.answer(
+            "❌ *Неверный формат времени*\n\n"
+            "Используй формат `ЧЧ:MM`, например:\n"
+            "`/settime 14:30`",
+            parse_mode="Markdown"
+        )
         return
 
     storage = Storage()
     storage.set_user_time(message.from_user.id, time_str)
 
-    await message.answer(f"✅ Время ежедневного дайджест установлено на {time_str}")
+    await message.answer(
+        f"✅ *Время ежедневного дайджеста установлено*\n\n"
+        f"⏰ Новое время: `{time_str}`",
+        parse_mode="Markdown"
+    )
 
 
 @router.message(Command("time"))
@@ -37,48 +53,19 @@ async def get_time_handler(message: Message):
     time = storage.get_user_time(message.from_user.id)
 
     if time:
-        await message.answer(f"⏰ Время для ежедневного дайджест:{time}")
+        await message.answer(
+            f"⏰ *Ваше текущее время рассылки*\n\n"
+            f"`{time}`",
+            parse_mode="Markdown"
+        )
     else:
-        await message.answer("⏰ Время ежедневного дайджест еще не установлено.")
+        await message.answer(
+            "⏰ *Время рассылки ещё не задано*\n\n"
+            "Используй команду:\n"
+            "`/settime ЧЧ:MM`",
+            parse_mode="Markdown"
+        )
 
-
-@router.callback_query(lambda c: c.data == "time")
-async def time_callback(callback: CallbackQuery):
-    storage = Storage()
-    time = storage.get_user_time(callback.from_user.id)
-
-    if time:
-        await callback.message.answer(f"⏰ Время для ежедневного дайджест: {time}")
-    else:
-        await callback.message.answer("⏰ Время ежедневного дайджест еще не установлено.")
-
-    await callback.answer()
-
-
-@router.callback_query(lambda c: c.data == "settime_help")
-async def settime_help_callback(callback: CallbackQuery):
-    await callback.message.answer(
-        "⚙️ *Установка времени рассылки*\n\n"
-        "Отправь команду:\n"
-        "`/settime HH:MM`\n\n"
-        "Пример:\n"
-        "`/settime 09:30`",
-        parse_mode="Markdown"
-    )
-    await callback.answer()
-
-
-@router.callback_query(lambda c: c.data == "help")
-async def help_callback(callback: CallbackQuery):
-    await callback.message.answer(
-        "📖 *Как пользоваться ботом*\n\n"
-        "🔄 /now — получить свежий дайджест\n"
-        "⏰ /time — посмотреть время рассылки\n"
-        "⚙️ /settime HH:MM — установить время\n\n"
-        "Используй кнопки ниже 👇",
-        parse_mode="Markdown"
-    )
-    await callback.answer()
 
 @router.message(Command("resetsent"))
 async def reset_sent_handler(message: Message):
@@ -87,7 +74,6 @@ async def reset_sent_handler(message: Message):
         return
 
     parts = message.text.strip().split()
-
     target_user_id = ADMIN_USER_ID
 
     if len(parts) == 2:
@@ -101,8 +87,33 @@ async def reset_sent_handler(message: Message):
     storage.clear_last_sent_date(target_user_id)
 
     await message.answer(
-        f"♻️ Состояние доставки сброшено для пользователя `{target_user_id}`.\n"
-        "Дайджест может быть отправлен снова сегодня.",
+        f"♻️ *Состояние доставки сброшено*\n\n"
+        f"👤 Пользователь: `{target_user_id}`\n"
+        "📬 Дайджест может быть отправлен снова сегодня.",
         parse_mode="Markdown"
     )
 
+@router.message(Command("users"))
+async def users_handler(message: Message):
+    if message.from_user.id != ADMIN_USER_ID:
+        await message.answer("⛔ Команда доступна только администратору")
+        return
+
+    storage = Storage()
+    users = storage.get_users(limit=20)
+
+    if not users:
+        await message.answer("Пока нет пользователей")
+        return
+
+    text = "👥 *Пользователи бота:*\n\n"
+
+    for u in users:
+        username = f"@{u['username']}" if u['username'] else "—"
+        text += (
+            f"🆔 `{u['user_id']}`\n"
+            f"👤 {username}\n"
+            f"📛 {u['full_name']}\n\n"
+        )
+
+    await message.answer(text, parse_mode="Markdown")

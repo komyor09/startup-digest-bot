@@ -3,12 +3,15 @@ from aiogram.filters import Command
 from aiogram.types import Message
 
 from app.keyboards.main import main_keyboard
+from app.storage import Storage
 
 router = Router()
 
 
 @router.message(Command("start"))
 async def start_handler(message: Message):
+    storage = Storage()
+    storage.save_user(message.from_user)
     text = (
         "👋 *Добро пожаловать!*\n\n"
         "Я автоматически собираю стартап- и венчурные новости "

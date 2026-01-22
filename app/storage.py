@@ -38,6 +38,15 @@ class Storage:
                 last_sent_date TEXT
             );
             """)
+
+        self.conn.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                user_id INTEGER PRIMARY KEY,
+                username TEXT,
+                full_name TEXT,
+                first_seen TEXT
+            )
+            """)
         self.conn.commit()
 
     def news_exists(self, url: str) -> bool:
@@ -120,9 +129,25 @@ class Storage:
         logger.info(f"[Storage] Digest marked as sent for {sent_date}")
 
     def clear_last_sent_date(self, user_id: int):
-        self.conn.execute(
-            "DELETE FROM delivery_state WHERE user_id = ?",
-            (user_id,)
-        )
+        self.conn.execute("DELETE FROM delivery_state WHERE user_id = ?", (user_id,))
         self.conn.commit()
         logger.info(f"[Storage] Delivery state reset for user {user_id}")
+
+
+    def save_user(self, user):
+        self.conn.execute(
+            """
+        INSERT OR IGNORE INTO users (user_id, username, full_name, first_seen)
+        VALUES (?, ?, ?, ?)
+        """,
+            (user.id, user.username, user.full_name, datetime.utcnow().isoformat()),
+        )
+        self.conn.commit()
+
+    def get_users(self, limit: int = 20):
+        cursor = self.conn.execute("""
+        SELECT * FROM users
+        ORDER BY first_seen DESC
+        LIMIT ?
+        """, (limit,))
+        return cursor.fetchall()

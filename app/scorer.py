@@ -1,6 +1,6 @@
 from datetime import datetime
 
-# Взвешенные ключевые слова (объяснимо и прозрачно)
+# Взвешенные ключевые слова
 KEYWORDS_WEIGHTS = {
     "investment": 3,
     "funding": 3,
@@ -15,7 +15,7 @@ KEYWORDS_WEIGHTS = {
     "artificial intelligence": 1,
 }
 
-# Бонусы за источник (экспертиза / сигнал качества)
+# Бонусы за источник 
 SOURCE_BONUS = {
     "TechCrunch": 2,
     "Sifted": 2,
@@ -32,12 +32,10 @@ def score_item(item: dict) -> int:
     summary = item.get("summary", "")
     text = f"{title} {summary}".lower()
 
-    # 1️⃣ Ключевые слова
     for keyword, weight in KEYWORDS_WEIGHTS.items():
         if keyword in text:
             score += weight
 
-    # 2️⃣ Свежесть (приоритет сегодняшним)
     published = item.get("published_at")
     if published:
         try:
@@ -51,7 +49,6 @@ def score_item(item: dict) -> int:
         except Exception:
             pass
 
-    # 3️⃣ Бонус за источник
     source = item.get("source")
     score += SOURCE_BONUS.get(source, 0)
 
