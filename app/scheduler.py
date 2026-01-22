@@ -12,12 +12,19 @@ async def send_daily_digest():
     if not news:
         return
 
-    text = "🚀 Daily Startup Digest\n\n"
+    today = datetime.utcnow().strftime("%d %b %Y")
+    text = f"🚀 *Daily Startup Digest* · {today}\n\n"
+
     for i, item in enumerate(news, 1):
-        text += f"{i}️⃣ {item['title']}\n🔗 {item['url']}\n\n"
+        source = item.get("source", "Unknown")
+        text += (
+            f"{i}️⃣ *{item['title']}*\n"
+            f"📍 {source}\n"
+            f"🔗 {item['url']}\n\n"
+        )
 
     try:
-        await bot.send_message(CHAT_ID, text)
+        await bot.send_message(CHAT_ID, text, parse_mode="Markdown")
     except TelegramNetworkError as e:
         print("Telegram network error:", e)
 
