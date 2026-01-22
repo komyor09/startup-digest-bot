@@ -13,19 +13,59 @@ and delivers a daily digest.
 - aiogram
 - SQLite
 
-## Data sources notes
+## Data sources
 
-VC.ru and RB.ru RSS feeds may occasionally return empty responses.
-In this MVP version, RSS parsing is implemented, but content availability
-depends on external feed stability.
+The service aggregates startup and venture news from the following sources:
 
-For production use, HTML parsing or official APIs can be added as a fallback.
+- **TechCrunch (Startups)** — via RSS feed  
+- **Hacker News** — via official public API  
+- **VC.ru (Tribuna / Startups)** — via RSS feed  
+- **RB.ru (Rusbase)** — via RSS feed  
+- **Sifted (startup-fundraise tag)** — via lightweight HTML parsing (MVP)
 
-### Sifted source note
+All sources are normalized into a unified internal format
+(title, url, summary, publication date, source).
 
-Sifted blocks automated HTTP requests (403 Forbidden).
-In this MVP version, a lightweight HTML parser is implemented with
-graceful fallback in case of access restrictions.
+---
 
-For production use, this source would require official API access
-or licensed content integration.
+## Known limitations (MVP notes)
+
+Some data sources apply technical restrictions that affect automated access.
+These limitations are intentionally handled gracefully in this MVP version.
+
+### VC.ru and RB.ru
+- RSS feeds may occasionally return empty responses.
+- This behavior depends on the external feed stability and is outside the control of the application.
+- The parser implementation is kept simple and reliable for MVP purposes.
+
+### Sifted
+- Sifted serves content dynamically and applies anti-bot protection.
+- Plain HTTP requests (and even headless browsers in some environments) may return
+  empty or incomplete HTML.
+- For this MVP, a lightweight HTML parser with graceful fallback is implemented.
+- Production-grade integration would require:
+  - official API access, or
+  - licensed data feeds, or
+  - a dedicated rendering service.
+
+These limitations are documented intentionally to keep the MVP lightweight,
+transparent, and focused on core functionality.
+
+---
+
+## Design decisions
+
+- No heavy scraping or anti-bot bypassing is used.
+- No headless browser is enabled by default to avoid unnecessary complexity.
+- Priority is given to system robustness, clarity, and explainable behavior.
+- The goal of this implementation is to demonstrate data flow, processing logic,
+  and delivery, rather than exhaustive content extraction.
+
+---
+
+## Future improvements
+
+- Add fallback strategies per source (API / rendered HTML where permitted)
+- Improve relevance scoring using NLP techniques
+- Extend digest personalization
+- Add source health monitoring
