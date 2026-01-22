@@ -1,168 +1,134 @@
 # Startup Digest Bot
-
-Telegram bot that aggregates startup and venture capital news from multiple
-industry sources and delivers a curated daily digest.
-
-The project is implemented as an MVP prototype to demonstrate
-data extraction, processing, and delivery pipelines in a clear
-and explainable way.
-
+Telegram-бот, который агрегирует новости о стартапах и венчурном капитале из нескольких
+отраслевых источников и ежедневно предоставляет подборку новостей.
+Проект реализован в виде **прототипа MVP**, чтобы продемонстрировать полный и
+прозрачный конвейер **извлечения, обработки и доставки данных**.
 ---
-
-## Overview
-
-The service automatically monitors selected technology and venture-focused
-media sources, extracts structured news data, filters duplicates,
-calculates relevance, and distributes a daily top-5 digest via Telegram.
-
-Two delivery modes are supported:
-
-- **Automatic daily digest** at a scheduled time
-- **On-demand digest** via the `/now` command
-
+## Обзор
+Сервис постоянно отслеживает выбранные технологические и венчурные
+медиа-источники, извлекает структурированные новостные данные, удаляет дубликаты,
+оценивает релевантность и рассылает **ежедневный дайджест Top-5** через Telegram.
+Поддерживаются два режима доставки:
+- **Автоматический ежедневный дайджест** в назначенное время
+- **Дайджест по запросу** с помощью команды `/now`
 ---
-
-## Functional Scope
-
-### Data Extraction
-
-The system performs regular monitoring of predefined sources.
-From each publication, the following data is extracted (when available):
-
-- News title
-- Direct link to the original source
-- Short description or lead paragraph
-- Publication date and time
-- Source identifier
-
-All data is normalized into a unified internal format.
-
+## Функциональный объем
+### Извлечение данных
+Система осуществляет регулярный мониторинг заранее определенных источников.
+Из каждой публикации извлекаются следующие данные (при наличии):
+- Заголовок новости
+- Прямая ссылка на исходный источник
+- Краткое описание или вступительный абзац
+- Дата и время публикации
+- Идентификатор источника
+Все данные нормализуются в единый внутренний формат.
 ---
-
-### Data Processing
-
-- Duplicate content is eliminated using URL-based uniqueness
-- All collected items are stored in SQLite
-- A daily relevance score is calculated for each item based on:
-  - weighted keyword indicators (funding, investment rounds, exits, etc.)
-  - publication recency
-  - source credibility bonus
-- A daily **Top-5** most relevant news items is generated automatically
-
-The relevance model is intentionally rule-based and explainable,
-which is appropriate for an MVP and easy to calibrate.
-
+### Обработка данных
+- Дубликаты контента удаляются с помощью уникальности на основе URL
+- Все собранные элементы хранятся в SQLite
+- Ежедневно для каждого элемента рассчитывается релевантность на основе:
+- взвешенных показателей ключевых слов (финансирование, раунды инвестиций, выходы и т. д.)
+- свежести публикации
+- бонуса за достоверность источника
+- Ежедневно автоматически генерируется **топ-5 самых релевантных новостей**
+Модель релевантности намеренно **основана на правилах и поддается объяснению**,
+что делает ее подходящей для MVP и легко калибруемой или расширяемой.
 ---
-
-### Delivery
-
-Information is delivered via a Telegram bot built with **aiogram**.
-
-Supported modes:
-
-1. **Scheduled delivery** — automatic daily digest at a fixed time
-2. **On-demand delivery** — instant digest generation via `/now`
-
-Each digest entry includes:
-
-- title
-- source
-- publication date/time
-- direct link
-
+### Доставка
+Информация доставляется через бота Telegram, созданного с помощью **aiogram**.
+Поддерживаемые режимы:
+1. **Запланированная доставка** — автоматический ежедневный дайджест в фиксированное время
+2. **Доставка по запросу** — мгновенное создание дайджеста с помощью `/now`
+Каждая запись дайджеста включает:
+- заголовок  
+- источник
+- дату и время публикации
+- прямую ссылку
 ---
-
-## Data Sources
-
-The service aggregates startup and venture news from the following resources:
-
-- **TechCrunch (Startups)** — RSS feed
-- **Hacker News** — official public API
-- **VC.ru (Tribuna / Startups)** — RSS feed
-- **RB.ru (Rusbase)** — RSS feed
-- **Sifted (startup-fundraise tag)** — lightweight HTML parsing (MVP)
-
+## Источники данных
+Сервис агрегирует новости о стартапах и венчурных инвестициях из следующих ресурсов:
+- **TechCrunch (Startups)** — RSS-канал
+- **Hacker News** — официальный публичный API
+  
+- **VC.ru (Трибуна / Стартапы)** — RSS-канал  
+- **RB.ru (Rusbase)** — RSS-канал  
+- **Sifted (тег startup-fundraise)** — легкий HTML-парсинг (MVP)
 ---
-
-## Known Limitations (MVP Notes)
-
-Some sources apply technical restrictions that affect automated access.
-These limitations are intentionally handled gracefully in this MVP.
-
-### VC.ru and RB.ru
-
-- RSS feeds may occasionally return empty responses
-- This behavior depends on external feed stability and is outside
-  the control of the application
-- The parsers are intentionally kept simple and reliable
-
+## Известные ограничения (примечания MVP)
+Некоторые источники применяют технические ограничения, которые влияют на автоматический доступ.
+Эти ограничения **намеренно обрабатываются корректно** в данном MVP.
+### VC.ru и RB.ru
+- RSS-каналы могут иногда возвращать пустые ответы
+- Это поведение зависит от стабильности внешнего канала и находится вне
+контроля приложения
+- Парсеры намеренно сделаны простыми и надежными
 ### Sifted
-
-- Sifted serves content dynamically and applies anti-bot protection
-- Plain HTTP requests (and even headless browsers in some environments)
-  may return empty or incomplete HTML
-- A lightweight HTML parser with graceful fallback is implemented for the MVP
-- Production-grade integration would require:
-  - official API access, or
-  - licensed data feeds, or
-  - a dedicated rendering service
-
-These limitations are documented intentionally to keep the MVP lightweight,
-transparent, and focused on core functionality.
-
+- Sifted динамически обслуживает контент и применяет защиту от ботов
+- Простые HTTP-запросы (и даже безголовные браузеры в некоторых средах)
+  могут возвращать пустой или неполный HTML
+- Реализован легкий HTML-парсер с изящным резервным вариантом
+- Для интеграции производственного уровня потребуется:
+- официальный доступ к API, или
+- лицензионные каналы данных, или
+- специальный сервис рендеринга
+Эти ограничения задокументированы, чтобы MVP оставался легким,
+прозрачным и сосредоточенным на основной функциональности.
 ---
-
-## Design Decisions
-
-- No heavy scraping or anti-bot bypassing is used
-- No headless browser is enabled by default to avoid unnecessary complexity
-- Priority is given to robustness, clarity, and explainable behavior
-- The goal of this implementation is to demonstrate:
-  - data flow
-  - duplicate protection
-  - relevance scoring
-  - delivery mechanics
-
-rather than exhaustive content extraction.
-
+## Решения по дизайну
+- Не используются тяжелые методы скрапинга или обхода антиботов  
+- По умолчанию не включен браузер без интерфейса, чтобы избежать ненужной сложности  
+- Приоритет отдается надежности, ясности и объяснимому поведению  
+Цель этой реализации — продемонстрировать:
+- поток данных  
+- защиту от дубликатов  
+- оценку релевантности  
+- механику доставки,
+ а не исчерпывающее извлечение контента.
 ---
-
-## Tech Stack
-
+## Технический стек
 - Python 3
 - aiogram (Telegram Bot API)
 - SQLite
 - asyncio
 - requests / feedparser / BeautifulSoup
-
 ---
-
-## Future Improvements
-
-- Source-specific fallback strategies (API / rendered HTML where permitted)
-- More advanced relevance scoring (NLP-based models)
-- Digest personalization per user
-- Source health monitoring and alerting
-- Deployment on VPS with unrestricted network access
-
+## Административные возможности
+Бот включает в себя минимальный административный интерфейс для оперативного управления:
+- Просмотр зарегистрированных пользователей
+- Сброс состояния ежедневной доставки для тестирования
+- Ручной запуск доставки дайджеста
+- Мониторинг поведения системы во время разработки
+Административные элементы управления намеренно упрощены, чтобы избежать чрезмерной инженерной проработки
+MVP.
 ---
-
-## How to Run
-
+## Будущие улучшения
+- Стратегии резервного копирования для конкретных источников (API / рендеринг HTML, где это разрешено)
+- Более продвинутая оценка релевантности (модели на основе NLP)
+- Персонализация дайджеста для каждого пользователя
+- Мониторинг работоспособности источников и оповещения
+- Развертывание на VPS с неограниченным доступом к сети
+---
+## Как запустить
+Установите зависимости:
 ```bash
 pip install -r requirements.txt
+```
+Запустите бота Telegram:
+```bash
 python -m app.bot
 ```
-
-For scheduled delivery:
-
+Запустите планировщик для ежедневной доставки:
 ```bash
 python -m app.scheduler
 ```
-
-## Notes
-
-Local access to Telegram Bot API may be restricted due to network,
-OS-level (e.g. Windows + IPv6), or regional limitations.
-In production, this is resolved by deploying the bot on a VPS
-with unrestricted network access.
+---
+## Примечания
+Локальный доступ к API Telegram Bot может быть ограничен из-за сетевых,
+ограничений на уровне ОС (например, Windows + IPv6) или региональных ограничений.
+В производственной среде эта проблема решается путем развертывания бота на VPS
+с неограниченным доступом к сети.
+---
+### ✅ Статус
+Этот проект соответствует требованиям тестового задания
+и демонстрирует полноценный, работающий MVP для стартапа по агрегации
+и доставке новостей.
